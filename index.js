@@ -1,9 +1,13 @@
 'use strict';
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+const VERIFICATION_TOKEN = process.env.VERIFICATION_TOKEN;
+
 const PL_YES = 'PL_YES';
 const PL_NO = 'PL_NO';
 const FACEBOOK_GRAPH_API_BASE_URL = 'https://graph.facebook.com/v2.6/';
+
+
 const
   request = require('request'),
   express = require('express'),
@@ -12,7 +16,11 @@ const
 
 
 // Sets server port and logs message on success
-app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
+app.listen(process.env.PORT || 1337, () => {
+  console.log('webhook is listening')
+  console.log(VERIFICATION_TOKEN);
+  console.log(PAGE_ACCESS_TOKEN);
+});
 
 // Accepts POST requests at /webhook endpoint
 app.post('/webhook', (req, res) => {
@@ -55,13 +63,13 @@ app.post('/webhook', (req, res) => {
 app.get('/webhook', (req, res) => {
 
   /** UPDATE YOUR VERIFY TOKEN **/
-  const VERIFY_TOKEN = process.env.VERIFICATION_TOKEN;
-
+  
+  
   // Parse params from the webhook verification request
   let mode = req.query['hub.mode'];
   let token = req.query['hub.verify_token'];
   let challenge = req.query['hub.challenge'];
-
+  console.log("VERIFICATION", VERIFICATION_TOKEN, token);
   // Check if a token and mode were sent
   if (mode && token) {
 
@@ -76,6 +84,8 @@ app.get('/webhook', (req, res) => {
       // Responds with '403 Forbidden' if verify tokens do not match
       res.sendStatus(403);
     }
+  } else {
+    res.sendStatus(403);
   }
 });
 
