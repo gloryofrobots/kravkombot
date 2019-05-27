@@ -103,10 +103,10 @@ function handlePostback(sender_psid, received_postback) {
   // Set the response and udpate db based on the postback payload
   switch (payload){
     case PL_YES:
-      nandleYes(sender_psid);
+      handleYes(sender_psid);
       break;
     case PL_NO:
-      nandleNo(sender_psid);
+      handleNo(sender_psid);
       break;
     case GREETING:
       handleGreetingPostback(sender_psid)
