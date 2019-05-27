@@ -5,6 +5,8 @@ const VERIFICATION_TOKEN = process.env.VERIFICATION_TOKEN;
 
 const PL_YES = 'PL_YES';
 const PL_NO = 'PL_NO';
+const GREETING = "GREETING";
+
 const FACEBOOK_GRAPH_API_BASE_URL = 'https://graph.facebook.com/v2.6/';
 
 
