@@ -11,18 +11,36 @@ const FACEBOOK_GRAPH_API_BASE_URL = 'https://graph.facebook.com/v2.6/';
 
 
 const
+  Pool = require('pg'),
   request = require('request'),
   express = require('express'),
   body_parser = require('body-parser'),
   app = express().use(body_parser.json()); // creates express http server
 
+const pool = new Pool({
+  "connectionString": process.env.DATABASE_URL,
+  "ssl": true
+});
 
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => {
   console.log('webhook is listening')
-  console.log(VERIFICATION_TOKEN);
-  console.log(PAGE_ACCESS_TOKEN);
+  // console.log(VERIFICATION_TOKEN);
+  // console.log(PAGE_ACCESS_TOKEN);
 });
+
+app.get('/db', async (req, res) => {
+    try {
+      const client = await pool.connect()
+      const result = await client.query('SELECT * FROM test_table');
+      const results = { 'results': (result) ? result.rows : null};
+      res.render('pages/db', results );
+      client.release();
+    } catch (err) {
+      console.error(err);
+      res.send("Error " + err);
+    }
+}) 
 
 // Accepts POST requests at /webhook endpoint
 app.post('/webhook', (req, res) => {
