@@ -9,9 +9,9 @@ const GREETING = "GREETING";
 
 const FACEBOOK_GRAPH_API_BASE_URL = 'https://graph.facebook.com/v2.6/';
 
+const { Pool } = require('pg');
 
 const
-  Pool = require('pg'),
   request = require('request'),
   express = require('express'),
   body_parser = require('body-parser'),
