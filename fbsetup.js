@@ -22,21 +22,11 @@ function persistent_menu(){
         "composer_input_disabled": true,
         "call_to_actions":[
             {
-            "title":"My Account",
-            "type":"nested",
-            "call_to_actions":[
-                {
-                "title":"Pay Bill",
-                "type":"postback",
-                "payload":"PAYBILL_PAYLOAD"
-                },
-                {
-                "type":"web_url",
-                "title":"Latest News",
-                "url":"https://www.messenger.com/",
-                "webview_height_ratio":"full"
-                }
-            ]
+            "type":"web_url",
+            "title":"Info",
+            "url":"https://kravkombot.herokuapp.com/groups",
+            "webview_height_ratio":"tall",
+            "messenger_extensions": "true"
             }
         ]
         }
@@ -46,5 +36,6 @@ function persistent_menu(){
 
 let get_started = {"get_started":{"payload":"GREETING"}}
 
-// engine.sendProfile(get_started);
-engine.sendProfile(persistent_menu());
+// engine.sendToProfile(get_started);
+engine.sendToProfile(persistent_menu());
+// engine.deleteFromProfile(["get_started"]);

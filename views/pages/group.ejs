@@ -1,15 +1,72 @@
+<!doctype html>
 <html>
   <head>
+    <% include ../partials/header.ejs %>
     <title> <%= group.name %> </title>
   </head>
   <body>
-    <div class="container">
-        <h4><%= group.name %></h4>
-        <ul>
-            <li> Price <%= group.price %> </li>
-            <li> Equipment <%= group.equipment.join(", ") %> </li>
+    <div class="container-fluid">
+        <h2><%= group.name %></h2>
+        <ul class="list-group">
+            <li class="list-group-item"> Price <%= group.price %> </li>
+            <li class="list-group-item"> Equipment <%= group.equipment.join(", ") %> </li>
         </ul>
-        <a href="/groups">Back</a>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">What price</div>
+            <div class="panel-body">
+                <%= group.price %> 
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">What Equipment?</div>
+            <div class="panel-body">
+                <%= group.equipment.join(", ")  %> 
+            </div>
+        </div>
+
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn  btn-link cllapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                          How much does it cost?
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body ml-1">
+                      <strong>Price <%= group.price %></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        What equipment do I need?
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        Equipment <%= group.equipment.join(", ") %>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed">
+                          <a href="/groups">Back</a>
+                        </button>
+                    </h5>
+                </div>
+            </div>
+        </div>
+
     </div>
   </body>
 </html>

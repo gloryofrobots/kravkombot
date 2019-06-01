@@ -26,9 +26,11 @@ const
   path = require('path');
 
   // creates express http server
-const app = express().use(body_parser.json()) 
-    .set('views', path.join(__dirname, 'views'))
-    .set('view engine', 'ejs');
+const app = express()
+  .use(body_parser.json()) 
+  .use(express.static(path.join(__dirname, 'public')))
+  .set('views', path.join(__dirname, 'views'))
+  .set('view engine', 'ejs');
 
 
 let asyncRequest = util.promisify(request);
@@ -59,7 +61,6 @@ app.get('/group', async (req, res) => {
     return;
   }
   let group = await model.loadGroup(id);
-  console.log("GROUP", group);
   res.render('pages/group', {group:group} );
 });
 

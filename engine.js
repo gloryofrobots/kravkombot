@@ -26,18 +26,33 @@ function sendMessage(ctx, message) {
     });
 };
 
-function sendProfile(data){
+function sendToProfile(data){
     request({
         "url": `${cfg.FACEBOOK_GRAPH_API_BASE_URL}me/messenger_profile`,
         "qs": { "access_token": cfg.PAGE_ACCESS_TOKEN },
         "method": "POST",
         "json": data
     }, (err, res, body) => {
-        console.log("Message Sent Response body:", body);
+        console.log("sendToProfile Response body:", body);
         if (err) {
-        console.error("Unable to send message:", err);
+        console.error("Unable to send to profile :", err);
         }
     });
+}
+
+function deleteFromProfile(fields) {
+    request({
+        "url": `${cfg.FACEBOOK_GRAPH_API_BASE_URL}me/messenger_profile`,
+        "qs": { "access_token": cfg.PAGE_ACCESS_TOKEN },
+        "method": "DELETE",
+        "json": {fields:fields}
+    }, (err, res, body) => {
+        console.log("deleteFromProfile Response body:", body);
+        if (err) {
+        console.error("Unable to delete from profile:", err);
+        }
+    });
+
 }
 
 function context(senderPSID, res){
@@ -57,7 +72,8 @@ function renderPlain(res, message) {
 
 module.exports = {
   sendMessage: sendMessage,
-  sendProfile: sendProfile,
+  sendToProfile: sendToProfile,
+  deleteFromProfile: deleteFromProfile,
   context: context,
   renderPlain:renderPlain,
   fburl:fburl
