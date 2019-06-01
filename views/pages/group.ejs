@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <title> <%= group.name %> </title>
+  </head>
+  <body>
+    <div class="container">
+        <h4><%= group.name %></h4>
+        <ul>
+            <li> Price <%= group.price %> </li>
+            <li> Equipment <%= group.equipment.join(", ") %> </li>
+        </ul>
+        <a href="/groups">Back</a>
+    </div>
+  </body>
+</html>

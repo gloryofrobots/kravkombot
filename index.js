@@ -1,46 +1,103 @@
 'use strict';
 
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const VERIFICATION_TOKEN = process.env.VERIFICATION_TOKEN;
+const LOCAL = process.env.LOCAL !== undefined;
 
-const PL_YES = 'PL_YES';
-const PL_NO = 'PL_NO';
-const GREETING = "GREETING";
+const PL_YES= 'PL_YES';
+const PL_NO= 'PL_NO';
+const PL_GREETING= "PL_GREETING";
 
-const FACEBOOK_GRAPH_API_BASE_URL = 'https://graph.facebook.com/v2.6/';
+// if (LOCAL){
+//     engine = require("./engineLocal");
+//     // let fbsetup = require("./fbsetup");
+//     // fbsetup(app);
+// } else{
+//     engine = require("./engine");
+// }
 
-const { Pool } = require('pg');
+const engine = require(LOCAL === true ? "./engineLocal" : "./engine");
 
 const
+  cfg = require("./cfg"),
+  model = require("./model"),
   request = require('request'),
+  util = require('util'),
   express = require('express'),
   body_parser = require('body-parser'),
-  app = express().use(body_parser.json()); // creates express http server
+  path = require('path');
 
-const pool = new Pool({
-  "connectionString": process.env.DATABASE_URL,
-  "ssl": true
-});
+  // creates express http server
+const app = express().use(body_parser.json()) 
+    .set('views', path.join(__dirname, 'views'))
+    .set('view engine', 'ejs');
+
+
+let asyncRequest = util.promisify(request);
+
 
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => {
-  console.log('webhook is listening')
+  console.log('webhook is listening');
   // console.log(VERIFICATION_TOKEN);
   // console.log(PAGE_ACCESS_TOKEN);
 });
 
+
+// app.get('/setup', async (req, res) => {
+//   let mode= req.query["mode"];
+//   if (mode == "get_started") {
+//     engine.sendProfile({"get_started":{"payload":"GREETING"}});
+//   } else {
+//     renderPlain(res, "Unknown setup mode");
+//   }
+// });
+
+app.get('/group', async (req, res) => {
+  let id = req.query["id"];
+  if (!id) {
+    console.error("INVALID GROUP ID");
+    res.status(404);
+    return;
+  }
+  let group = await model.loadGroup(id);
+  console.log("GROUP", group);
+  res.render('pages/group', {group:group} );
+});
+
+app.get('/groups', async (req, res) => {
+  try {
+    var groups = await model.loadGroups();
+    res.render('pages/groups', { 'groups': groups } );
+  } catch (err) {
+    res.send("Error " + err);
+  }
+});
+
 app.get('/db', async (req, res) => {
-    try {
-      const client = await pool.connect()
-      const result = await client.query('SELECT * FROM test_table');
-      const results = { 'results': (result) ? result.rows : null};
-      res.render('pages/db', results );
-      client.release();
-    } catch (err) {
-      console.error(err);
-      res.send("Error " + err);
-    }
-}) 
+  try {
+    const results = await model.loadTest();
+    res.render('pages/db', {results:results} );
+  } catch (err) {
+    res.send("Error " + err);
+  }
+});
+
+// Accepts GET requests at the /webhook endpoint
+app.get('/test', (req, res) => {
+  // Parse params from the webhook verification request
+  let pb = req.query['pb'];
+  let ctx = engine.context("TESTUSER", res);
+  // Set the response and udpate db based on the postback payload
+  if (pb){
+    console.log("postback is", pb);
+    handlePostback(ctx, {payload:pb});
+    res.status(200);
+  } else {
+    console.log("postback unspecified");
+    res.status(404);
+  }
+  // Return a '200 OK' response to all events
+});
+
 
 // Accepts POST requests at /webhook endpoint
 app.post('/webhook', (req, res) => {
@@ -49,6 +106,7 @@ app.post('/webhook', (req, res) => {
   res.status(200).send('EVENT_RECEIVED');
 
   const body = req.body;
+  const ctx = engine.context(messagingEvent.sender_id, res);
 
   if (body.object === 'page') {
       // Iterate over each entry
@@ -56,17 +114,18 @@ app.post('/webhook', (req, res) => {
       if (body.entry && body.entry.length <= 0){
         return;
       }
+
       body.entry.forEach((pageEntry) => {
         // Iterate over each messaging event and handle accordingly
         pageEntry.messaging.forEach((messagingEvent) => {
           console.log({messagingEvent});
           if (messagingEvent.postback) {
-            handlePostback(messagingEvent.sender.id, messagingEvent.postback);
+            handlePostback(ctx, messagingEvent.postback);
           } else if (messagingEvent.message) {
             if (messagingEvent.message.quick_reply){
-              handlePostback(messagingEvent.sender.id, messagingEvent.message.quick_reply);
+              handlePostback(ctx, messagingEvent.message.quick_reply);
             } else{
-              handleMessage(messagingEvent.sender.id, messagingEvent.message);
+              handleMessage(ctx, messagingEvent.message);
             }
           } else {
             console.log(
@@ -86,12 +145,12 @@ app.get('/webhook', (req, res) => {
   let mode = req.query['hub.mode'];
   let token = req.query['hub.verify_token'];
   let challenge = req.query['hub.challenge'];
-  console.log("VERIFICATION", VERIFICATION_TOKEN, token);
+  console.log("VERIFICATION", cfg.VERIFICATION_TOKEN, token);
   // Check if a token and mode were sent
   if (mode && token) {
 
     // Check the mode and token sent are correct
-    if (mode === 'subscribe' && token === VERIFICATION_TOKEN) {
+    if (mode === 'subscribe' && token === cfg.VERIFICATION_TOKEN) {
 
       // Respond with 200 OK and challenge token from the request
       console.log('WEBHOOK_VERIFIED');
@@ -106,61 +165,93 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-function handleMessage(sender_psid, message) {
+function handleMessage(ctx, message) {
   // check if it is a location message
   console.log('handleMEssage message:', JSON.stringify(message));
-  handlePostback(sender_psid, {payload: GREETING});
+  handlePostback(ctx, {payload: PL_GREETING});
   return;
 }
 
 
-function handlePostback(sender_psid, received_postback) {
+function handlePostback(ctx, postback) {
   // Get the payload for the postback
-  const payload = received_postback.payload;
+  const payload = postback.payload;
 
   // Set the response and udpate db based on the postback payload
   switch (payload){
     case PL_YES:
-      handleYes(sender_psid);
+      handleYes(ctx);
       break;
     case PL_NO:
-      handleNo(sender_psid);
+      handleNo(ctx);
       break;
-    case GREETING:
-      handleGreetingPostback(sender_psid)
+    case PL_GREETING:
+      handleGreetingPostback(ctx);
       break;
     default:
       console.log('Cannot differentiate the payload type');
   }
 }
 
-function callSendAPI(sender_psid, response) {
-  // Construct the message body
-  console.log('message to be sent: ', response);
-  let request_body = {
-    "recipient": {
-      "id": sender_psid
-    },
-    "message": response
-  }
+function handleNo(ctx){
+  const payload = {
+    "text": "Well this is somewhat homoerotic"
+  };
+  engine.sendMessage(ctx, payload);
+}
 
-  // Send the HTTP request to the Messenger Platform
+
+function handleYes(ctx){
+  const payload = {
+    "text": "Good for you but try to think about Jesus some more "
+  };
+  engine.sendMessage(ctx, payload);
+}
+
+
+function handleGreetings(ctx){
+  return;
   request({
-    "url": `${FACEBOOK_GRAPH_API_BASE_URL}me/messages`,
-    "qs": { "access_token": PAGE_ACCESS_TOKEN },
-    "method": "POST",
-    "json": request_body
-  }, (err, res, body) => {
-    console.log("Message Sent Response body:", body);
-    if (err) {
-      console.error("Unable to send message:", err);
+    url: engine.fburl(ctx),
+    qs: {
+      access_token: cfg.PAGE_ACCESS_TOKEN,
+      fields: "first_name"
+    },
+    method: "GET"
+  }, function(error, response, body) {
+    var greeting = "";
+    if (error) {
+      console.log("Error getting user's name: " +  error);
+    } else {
+      var bodyObj = JSON.parse(body);
+      const name = bodyObj.first_name;
+      greeting = "Hi " + name + ". ";
     }
+    const message = greeting + "Who do you love more?";
+    const greetingPayload = {
+      "text": message,
+      "quick_replies":[
+        {
+          "content_type":"text",
+          "title":"Sasha Gray",
+          "payload": cfg.PL_YES
+        },
+        {
+          "content_type":"text",
+          "title":"Jesus",
+          "payload": cfg.PL_NO
+        }
+      ]
+    };
+    engine.sendMessage(ctx, greetingPayload);
   });
 }
 
-function handleConfirmLocation(sender_psid, geocoding_location, geocoding_formattedAddr){
+
+
+function handleConfirmLocation(ctx, geocoding_location, geocoding_formattedAddr){
   console.log('Geocoding api result: ', geocoding_location);
-  const query = {$and: [{'user_id': sender_psid}, { 'status': AUSTRALIA_YES }]};
+  const query = {$and: [{'user_id': ctx.senderPSID}, { 'status': AUSTRALIA_YES }]};
   const update = {
     $set: { "location.lat": geocoding_location.lat, "location.long": geocoding_location.lng, status: AU_LOC_PROVIDED }
   };
@@ -192,61 +283,7 @@ function handleConfirmLocation(sender_psid, geocoding_location, geocoding_format
           }
         }
       };
-      callSendAPI(sender_psid, response);
+      engine.sendMessage(ctx, response);
     }
   });
 }
-
-
-function handleNo(sender_psid){
-  const payload = {
-    "text": "Well this is somewhat homoerotic"
-  };
-  callSendAPI(sender_psid, payload);
-}
-
-function handleYes(sender_psid){
-  const payload = {
-    "text": "Good for you but try to think about Jesus some more "
-  };
-  callSendAPI(sender_psid, payload);
-}
-
-function handleGreetingPostback(sender_psid){
-  request({
-    url: `${FACEBOOK_GRAPH_API_BASE_URL}${sender_psid}`,
-    qs: {
-      access_token: process.env.PAGE_ACCESS_TOKEN,
-      fields: "first_name"
-    },
-    method: "GET"
-  }, function(error, response, body) {
-    var greeting = "";
-    if (error) {
-      console.log("Error getting user's name: " +  error);
-    } else {
-      var bodyObj = JSON.parse(body);
-      const name = bodyObj.first_name;
-      greeting = "Hi " + name + ". ";
-    }
-    const message = greeting + "Who do you love more?";
-    const greetingPayload = {
-      "text": message,
-      "quick_replies":[
-        {
-          "content_type":"text",
-          "title":"Sasha Gray",
-          "payload": PL_YES
-        },
-        {
-          "content_type":"text",
-          "title":"Jesus",
-          "payload": PL_NO
-        }
-      ]
-    };
-    callSendAPI(sender_psid, greetingPayload);
-  });
-}
-
-
