@@ -2,15 +2,15 @@
 <html>
   <head>
     <% include ../partials/header.ejs %>
-    <title>Groups</title>
+    <title>Інфомація про заняття</title>
   </head>
   <body>
     <div class="container-fluid">
-    <h4>Choose group</h4>
+    <h5>Оберіть групу</h5>
 
-    <ul>
+    <ul class="list-group-flush" >
         <% groups.forEach(function(r) { %>
-            <li><a href="/group?id=<%= r.id %>"><%= r.name %></a></li>
+            <li class="list-group-item"><a href="/group?id=<%= r.id %>"><%= r.name %></a></li>
         <% }); %>
     </ul>
 

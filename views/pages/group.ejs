@@ -7,65 +7,72 @@
   <body>
     <div class="container-fluid">
         <h2><%= group.name %></h2>
-        <ul class="list-group">
-            <li class="list-group-item"> Price <%= group.price %> </li>
-            <li class="list-group-item"> Equipment <%= group.equipment.join(", ") %> </li>
-        </ul>
+        <!-- <ul class="list-group"> -->
+        <!--     <li class="list-group-item"> Price <%= group.price %> </li> -->
+        <!--     <li class="list-group-item"> Equipment <%= group.equipment.join(", ") %> </li> -->
+        <!-- </ul> -->
 
         <div class="panel panel-default">
-            <div class="panel-heading">What price</div>
+            <div class="panel-heading">Скільки коштують заняття?</div>
             <div class="panel-body">
-                <%= group.price %> 
+                <%= group.price %> гривень в місяць
             </div>
         </div>
 
         <div class="panel panel-default">
-            <div class="panel-heading">What Equipment?</div>
+            <div class="panel-heading">Яке спорядження необхідне для занять? (якщо у Вас чогось немає, на перших порах можна користуватись загальним спорядженням)</div>
             <div class="panel-body">
                 <%= group.equipment.join(", ")  %> 
             </div>
         </div>
 
-        <div id="accordion">
-            <div class="card">
-                <div class="card-header" id="headingOne">
-                    <h5 class="mb-0">
-                        <button class="btn  btn-link cllapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                          How much does it cost?
-                        </button>
-                    </h5>
-                </div>
-                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-                    <div class="card-body ml-1">
-                      <strong>Price <%= group.price %></strong>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header" id="headingTwo">
-                    <h5 class="mb-0">
-                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                        What equipment do I need?
-                        </button>
-                    </h5>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
-                    <div class="card-body">
-                        Equipment <%= group.equipment.join(", ") %>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <button class="btn btn-link collapsed">
-                          <a href="/groups">Back</a>
-                        </button>
-                    </h5>
-                </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Де проходять заняття</div>
+            <div class="panel-body">
+                <%= group.address  %> 
             </div>
         </div>
+
+        <!-- <div id="accordion"> -->
+        <!--     <div class="card"> -->
+        <!--         <div class="card-header" id="headingOne"> -->
+        <!--             <h5 class="mb-0"> -->
+        <!--                 <button class="btn  btn-link cllapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne"> -->
+        <!--                   How much does it cost? -->
+        <!--                 </button> -->
+        <!--             </h5> -->
+        <!--         </div> -->
+        <!--         <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion"> -->
+        <!--             <div class="card-body ml-1"> -->
+        <!--               <strong>Price <%= group.price %></strong> -->
+        <!--             </div> -->
+        <!--         </div> -->
+        <!--     </div> -->
+
+        <!--     <div class="card"> -->
+        <!--         <div class="card-header" id="headingTwo"> -->
+        <!--             <h5 class="mb-0"> -->
+        <!--                 <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo"> -->
+        <!--                 What equipment do I need? -->
+        <!--                 </button> -->
+        <!--             </h5> -->
+        <!--         </div> -->
+        <!--         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion"> -->
+        <!--             <div class="card-body"> -->
+        <!--                 Equipment <%= group.equipment.join(", ") %> -->
+        <!--             </div> -->
+        <!--         </div> -->
+        <!--     </div> -->
+        <!--     <div class="card"> -->
+        <!--         <div class="card-header"> -->
+        <!--             <h5 class="mb-0"> -->
+        <!--                 <button class="btn btn-link collapsed"> -->
+        <!--                   <a href="/groups">Back</a> -->
+        <!--                 </button> -->
+        <!--             </h5> -->
+        <!--         </div> -->
+        <!--     </div> -->
+        <!-- </div> -->
 
     </div>
   </body>
