@@ -2,17 +2,38 @@
 <html>
   <head>
     <% include ../partials/header.ejs %>
-    <title>Інфомація про заняття</title>
+    <title>Krav Maga and Combatives</title>
   </head>
   <body>
     <div class="container-fluid">
-    <h5>Оберіть групу</h5>
+    <h4>Выберите группу</h4>
 
-    <ul class="list-group-flush" >
-        <% groups.forEach(function(r) { %>
-            <li class="list-group-item"><a href="/group?id=<%= r.id %>"><%= r.name %></a></li>
-        <% }); %>
-    </ul>
+        <!-- <% groups.forEach(function(r) { %> -->
+        <!--     <p><a href="/group?id=<%= r.id %>"><%= r.name %></a></p> -->
+        <!-- <% }); %> -->
+        <div id="accordion">
+            <% groups.forEach(function(group) { %>
+
+            <div class="card">
+                <div class="card-header" id="heading<%= group.id %>">
+                    <h5 class="mb-0">
+                        <button class="btn  btn-link cllapsed" data-toggle="collapse" data-target="#collapse<%= group.id %>" aria-expanded="false" aria-controls="collapse<%= group.id %>">
+                          <strong><%= group.name %></strong>
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapse<%= group.id %>" class="collapse" aria-labelledby="heading<%= group.id %>" data-parent="#accordion">
+                    <div class="card-body ml-1">
+                      <% include ../partials/group_info.ejs %>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+    <!-- <ul class="list-group list-group-flush" > -->
+    <!--     <% groups.forEach(function(r) { %> -->
+    <!--         <li class="list-group-item"><a href="/group?id=<%= r.id %>"><%= r.name %></a></li> -->
+    <!--     <% }); %> -->
+    <!-- </ul> -->
 
     </div>
   </body>

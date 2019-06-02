@@ -23,7 +23,7 @@ function persistent_menu(){
         "call_to_actions":[
             {
             "type":"web_url",
-            "title":"Info",
+            "title":"Часто задаваемые вопросы",
             "url":"https://kravkombot.herokuapp.com/groups",
             "webview_height_ratio":"tall",
             "messenger_extensions": "true"
@@ -34,8 +34,20 @@ function persistent_menu(){
     }
 }
 
+function greeting() {
+  return {
+        "greeting":[{
+            "locale":"default",
+            "text":"Здравствуйте, {{user_first_name}}, мы будем рады ответь Вам на любой вопрос." +
+            " Так же Вы можете просмотреть ответы на часто задаваемые вопросы" +
+            ", использовав контекстное меню чата (иконка слева от поля ввода)"
+        }]
+    }
+}
+
 let get_started = {"get_started":{"payload":"GREETING"}}
 
 // engine.sendToProfile(get_started);
-engine.sendToProfile(persistent_menu());
+// engine.sendToProfile(persistent_menu());
+engine.sendToProfile(greeting());
 // engine.deleteFromProfile(["get_started"]);

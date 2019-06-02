@@ -1,0 +1,30 @@
+<div class="mb-0">
+    <div class="panel panel-default">
+        <div class="panel-heading">Локация</div>
+        <div class="panel-body">
+            <%= group.address  %> 
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Время тренировок</div>
+        <div class="panel-body">
+            <%= group.start_time  %>-<%= group.end_time  %> 
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Стоимость занятий</div>
+        <div class="panel-body">
+            <%= group.price %> грн в месяц
+        </div>
+    </div>     
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Снаряжение </div>
+        <div class="panel-body">
+            <p><%= group.equipment.join(", ")  %> </p>
+            <p>(Если у Вас нет перчаток, на первых порах можно пользоваться общими)</p>
+        </div>
+    </div>
+</div>

@@ -6,33 +6,7 @@
   </head>
   <body>
     <div class="container-fluid">
-        <h2><%= group.name %></h2>
-        <!-- <ul class="list-group"> -->
-        <!--     <li class="list-group-item"> Price <%= group.price %> </li> -->
-        <!--     <li class="list-group-item"> Equipment <%= group.equipment.join(", ") %> </li> -->
-        <!-- </ul> -->
-
-        <div class="panel panel-default">
-            <div class="panel-heading">Скільки коштують заняття?</div>
-            <div class="panel-body">
-                <%= group.price %> гривень в місяць
-            </div>
-        </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">Яке спорядження необхідне для занять? (якщо у Вас чогось немає, на перших порах можна користуватись загальним спорядженням)</div>
-            <div class="panel-body">
-                <%= group.equipment.join(", ")  %> 
-            </div>
-        </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">Де проходять заняття</div>
-            <div class="panel-body">
-                <%= group.address  %> 
-            </div>
-        </div>
-
+    <% include ../partials/group_info.ejs %>
         <!-- <div id="accordion"> -->
         <!--     <div class="card"> -->
         <!--         <div class="card-header" id="headingOne"> -->
