@@ -1,10 +1,7 @@
 'use strict';
 
 const LOCAL = process.env.LOCAL !== undefined;
-
-const PL_YES= 'PL_YES';
-const PL_NO= 'PL_NO';
-const PL_GREETING= "PL_GREETING";
+console.log("LCL", LOCAL);
 
 // if (LOCAL){
 //     engine = require("./engineLocal");
@@ -18,6 +15,7 @@ const engine = require(LOCAL === true ? "./engineLocal" : "./engine");
 
 const
   cfg = require("./cfg"),
+  messages = require("./messages"),
   model = require("./model"),
   request = require('request'),
   util = require('util'),
@@ -169,48 +167,74 @@ app.get('/webhook', (req, res) => {
 function handleMessage(ctx, message) {
   // check if it is a location message
   console.log('handleMEssage message:', JSON.stringify(message));
-  handlePostback(ctx, {payload: PL_GREETING});
+  handlePostback(ctx, {payload: messages.PL_START});
   return;
 }
-
 
 function handlePostback(ctx, postback) {
   // Get the payload for the postback
   const payload = postback.payload;
-
   // Set the response and udpate db based on the postback payload
-  switch (payload){
-    case PL_YES:
-      handleYes(ctx);
-      break;
-    case PL_NO:
-      handleNo(ctx);
-      break;
-    case PL_GREETING:
-      handleGreetingPostback(ctx);
-      break;
-    default:
+  console.log("payload", payload);
+  if (payload == messages.PL_START) {
+      handleStart(ctx);
+  } else if (payload == messages.PL_ACTIVATE) {
+      handleActivate(ctx);
+  } else if (payload == messages.PL_DEACTIVATE) {
+      handleDeactivate(ctx);
+  } else if (payload.startsWith(messages.PL_GROUP)) {
+    var id = messages.extractId(payload)
+    handleGroup(ctx, id);
+  } else if (payload.startsWith(messages.PL_PRICE)) {
+    var id = messages.extractId(payload)
+    handleGroupPrice(ctx, id);
+  } else if (payload.startsWith(messages.PL_LOCATION)) {
+    var id = messages.extractId(payload)
+    handleGroupLocation(ctx, id);
+  } else if (payload.startsWith(messages.PL_EQUIPMENT)) {
+    var id = messages.extractId(payload)
+    handleGroupEquipment(ctx, id);
+  } else {
       console.log('Cannot differentiate the payload type');
   }
 }
 
-function handleNo(ctx){
-  const payload = {
-    "text": "Well this is somewhat homoerotic"
-  };
-  engine.sendMessage(ctx, payload);
+function handleDisable(ctx){
+  engine.sendMessage(ctx, messages.disabled);
+}
+
+async function handleActivate(ctx){
+  var groups = await model.loadGroups()
+  var msg = await messages.activated(groups)
+  engine.sendMessage(ctx, msg);
+}
+
+async function handleGroup(ctx, id){
+  var group = await model.loadGroup(id);
+  var msg = messages.group(group)
+  engine.sendMessage(ctx, msg);
+}
+
+async function handleGroupPrice(ctx, id){
+  var group = await model.loadGroup(id);
+  var msg = messages.groupPrice(group)
+  engine.sendMessage(ctx, msg);
+}
+
+async function handleGroupEquipment(ctx, id){
+  var group = await model.loadGroup(id);
+  var msg = messages.groupEquipment(group)
+  engine.sendMessage(ctx, msg);
+}
+
+async function handleGroupLocation(ctx, id){
+  var group = await model.loadGroup(id);
+  var msg = messages.groupLocation(group)
+  engine.sendMessage(ctx, msg);
 }
 
 
-function handleYes(ctx){
-  const payload = {
-    "text": "Good for you but try to think about Jesus some more "
-  };
-  engine.sendMessage(ctx, payload);
-}
-
-
-function handleGreetings(ctx){
+function handleStart(ctx){
   return;
   request({
     url: engine.fburl(ctx),
@@ -220,30 +244,14 @@ function handleGreetings(ctx){
     },
     method: "GET"
   }, function(error, response, body) {
-    var greeting = "";
+    var name = "";
     if (error) {
       console.log("Error getting user's name: " +  error);
     } else {
       var bodyObj = JSON.parse(body);
-      const name = bodyObj.first_name;
-      greeting = "Hi " + name + ". ";
+      name = bodyObj.first_name;
     }
-    const message = greeting + "Who do you love more?";
-    const greetingPayload = {
-      "text": message,
-      "quick_replies":[
-        {
-          "content_type":"text",
-          "title":"Sasha Gray",
-          "payload": cfg.PL_YES
-        },
-        {
-          "content_type":"text",
-          "title":"Jesus",
-          "payload": cfg.PL_NO
-        }
-      ]
-    };
+    const message = messages.start(name);
     engine.sendMessage(ctx, greetingPayload);
   });
 }

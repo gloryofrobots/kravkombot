@@ -4,7 +4,7 @@ const cfg = require('./cfg');
 
 function sendMessage(ctx, message) {
     // Construct the message body
-    console.log('message to be sent: ', message);
+    // console.log('message to be sent: ', message);
     let request_body = {
         "recipient": {
         "id": ctx.senderPSID

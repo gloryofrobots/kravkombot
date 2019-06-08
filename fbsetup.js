@@ -1,5 +1,6 @@
 
 const engine = require("./engine");
+const messages = require("./messages");
 
 // module.exports = (app) => {
 //     app.get('/setup', (req, res) => {
@@ -22,11 +23,16 @@ function persistent_menu(){
         "composer_input_disabled": true,
         "call_to_actions":[
             {
-            "type":"web_url",
-            "title":"Часто задаваемые вопросы",
-            "url":"https://kravkombot.herokuapp.com/groups",
-            "webview_height_ratio":"tall",
-            "messenger_extensions": "true"
+                "type":"web_url",
+                "title":"Часто задаваемые вопросы",
+                "url":"https://kravkombot.herokuapp.com/groups",
+                "webview_height_ratio":"tall",
+                "messenger_extensions": "true"
+            },
+            {
+                "type":"postback",
+                "title":"Активировать чат бот",
+                "payload":"PL_ACTIVATED"
             }
         ]
         }
@@ -45,9 +51,9 @@ function greeting() {
     }
 }
 
-let get_started = {"get_started":{"payload":"GREETING"}}
+let get_started = {"get_started":{"payload":messages.PL_START}}
 
 // engine.sendToProfile(get_started);
-// engine.sendToProfile(persistent_menu());
-engine.sendToProfile(greeting());
+engine.sendToProfile(persistent_menu());
+// engine.sendToProfile(greeting());
 // engine.deleteFromProfile(["get_started"]);
